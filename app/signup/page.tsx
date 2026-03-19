@@ -1,6 +1,26 @@
+"use client";
+
+import { useState } from "react";
 import { validateSignupForm } from "./actions";
 
 export default function SignupPage() {
+  const [errors, setErrors] = useState<any>({});
+  const [success, setSuccess] = useState("");
+
+  async function handleSubmit(formData: FormData) {
+    const result = await validateSignupForm(formData);
+
+    if (!result) return;
+
+    if (!result.success) {
+      setErrors(result.errors || {});
+      setSuccess("");
+    } else {
+      setErrors({});
+      setSuccess(result.message || "Success!");
+    }
+  }
+
   return (
     <main
       style={{
@@ -11,8 +31,12 @@ export default function SignupPage() {
     >
       <h1>Create an Account</h1>
 
+      {success && (
+        <p style={{ color: "green", marginTop: "10px" }}>{success}</p>
+      )}
+
       <form
-        action={validateSignupForm}
+        action={handleSubmit}
         style={{
           display: "flex",
           flexDirection: "column",
@@ -21,86 +45,40 @@ export default function SignupPage() {
         }}
       >
         <div>
-          <label htmlFor="name">Full Name</label>
-          <input
-            id="name"
-            name="name"
-            type="text"
-            style={{
-              display: "block",
-              width: "100%",
-              padding: "8px",
-              marginTop: "6px",
-            }}
-          />
+          <label>Full Name</label>
+          <input name="name" type="text" />
+          {errors.name && <p style={{ color: "red" }}>{errors.name[0]}</p>}
         </div>
 
         <div>
-          <label htmlFor="email">Email</label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            style={{
-              display: "block",
-              width: "100%",
-              padding: "8px",
-              marginTop: "6px",
-            }}
-          />
+          <label>Email</label>
+          <input name="email" type="email" />
+          {errors.email && <p style={{ color: "red" }}>{errors.email[0]}</p>}
         </div>
 
         <div>
-          <label htmlFor="phone">Phone Number</label>
-          <input
-            id="phone"
-            name="phone"
-            type="tel"
-            style={{
-              display: "block",
-              width: "100%",
-              padding: "8px",
-              marginTop: "6px",
-            }}
-          />
+          <label>Phone</label>
+          <input name="phone" type="tel" />
+          {errors.phone && <p style={{ color: "red" }}>{errors.phone[0]}</p>}
         </div>
 
         <div>
-          <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            style={{
-              display: "block",
-              width: "100%",
-              padding: "8px",
-              marginTop: "6px",
-            }}
-          />
+          <label>Password</label>
+          <input name="password" type="password" />
+          {errors.password && (
+            <p style={{ color: "red" }}>{errors.password[0]}</p>
+          )}
         </div>
 
         <div>
-          <label htmlFor="confirmPassword">Confirm Password</label>
-          <input
-            id="confirmPassword"
-            name="confirmPassword"
-            type="password"
-            style={{
-              display: "block",
-              width: "100%",
-              padding: "8px",
-              marginTop: "6px",
-            }}
-          />
+          <label>Confirm Password</label>
+          <input name="confirmPassword" type="password" />
+          {errors.confirmPassword && (
+            <p style={{ color: "red" }}>{errors.confirmPassword[0]}</p>
+          )}
         </div>
 
-        <button
-          type="submit"
-          style={{ padding: "10px 16px", cursor: "pointer" }}
-        >
-          Sign Up
-        </button>
+        <button type="submit">Sign Up</button>
       </form>
     </main>
   );

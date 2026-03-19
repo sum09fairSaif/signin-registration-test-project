@@ -16,8 +16,10 @@ export async function validateSignupForm(formData: FormData) {
   const result = signupSchema.safeParse(rawData);
 
   if (!result.success) {
-    console.log("VALIDATION ERRORS:", result.error.flatten().fieldErrors);
-    return;
+    return {
+      success: false,
+      errors: result.error.flatten().fieldErrors,
+    };
   }
 
   const { name, email, phone, password } = result.data;
@@ -27,8 +29,10 @@ export async function validateSignupForm(formData: FormData) {
   });
 
   if (existingUserByEmail) {
-    console.log("ERROR: Email already registered");
-    return;
+    return {
+      success: false,
+      errors: { email: ["Email already registered"] },
+    };
   }
 
   if (phone && phone.trim() !== "") {
@@ -37,14 +41,16 @@ export async function validateSignupForm(formData: FormData) {
     });
 
     if (existingUserByPhone) {
-      console.log("ERROR: Phone number already registered");
-      return;
+      return {
+        success: false,
+        errors: { phone: ["Phone number already registered"] },
+      };
     }
   }
 
   const hashedPassword = await argon2.hash(password);
 
-  const newUser = await prisma.user.create({
+  await prisma.user.create({
     data: {
       name,
       email,
@@ -53,5 +59,8 @@ export async function validateSignupForm(formData: FormData) {
     },
   });
 
-  console.log("USER CREATED SUCCESSFULLY:", newUser.id);
+  return {
+    success: true,
+    message: "Account created successfully!",
+  };
 }
