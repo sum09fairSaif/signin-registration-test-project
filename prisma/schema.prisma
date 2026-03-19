@@ -12,7 +12,13 @@ datasource db {
   provider = "postgresql"
 }
 
-model Test {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
+model User {
+  id             String   @id @default(uuid())
+  email          String   @unique
+  phone          String?  @unique
+  passwordHash   String
+  emailVerified  DateTime?
+  phoneVerified  DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
