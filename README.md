@@ -1,1 +1,0 @@
-# signin-registration-test-project
