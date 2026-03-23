@@ -1,32 +1,30 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { loginUser } from "./actions";
+import { verifyLoginCode } from "./actions";
 
-export default function LoginPage() {
-  const [error, setError] = useState("");
+export default function VerifyLoginPage() {
+  const params = useSearchParams();
+  const email = params.get("email") ?? "";
+
   const [message, setMessage] = useState("");
-  const router = useRouter();
+  const [error, setError] = useState("");
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
-    const result = await loginUser(formData);
+    const result = await verifyLoginCode(formData);
 
     if (!result) return;
 
     if (!result.success) {
-      setError(result.error || "Invalid email or password");
+      setError(result.error || "Invalid or expired code.");
       setMessage("");
-      return;
-    }
-
-    if (result.requiresOtp) {
+    } else {
       setError("");
-      setMessage(result.message || "");
-      router.push(`/verify-login?email=${encodeURIComponent(result.email)}`);
+      setMessage(result.message || "Verification successful.");
     }
   }
 
@@ -38,9 +36,11 @@ export default function LoginPage() {
         fontFamily: "Arial, sans-serif",
       }}
     >
-      <h1>Login</h1>
+      <h1>Verify Login</h1>
+      <p>Enter the verification code sent to your email.</p>
 
       {message && <p style={{ color: "green" }}>{message}</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
 
       <form
         onSubmit={handleSubmit}
@@ -51,11 +51,14 @@ export default function LoginPage() {
           marginTop: "24px",
         }}
       >
+        <input type="hidden" name="email" value={email} />
+
         <div>
-          <label>Email</label>
+          <label>Verification Code</label>
           <input
-            name="email"
-            type="email"
+            name="code"
+            type="text"
+            maxLength={6}
             style={{
               display: "block",
               width: "100%",
@@ -79,26 +82,13 @@ export default function LoginPage() {
           />
         </div>
 
-        {error && (
-          <p style={{ color: "red", marginTop: "8px" }}>
-            {error}
-          </p>
-        )}
-
         <button
           type="submit"
-          style={{
-            padding: "10px 16px",
-            cursor: "pointer",
-          }}
+          style={{ padding: "10px 16px", cursor: "pointer" }}
         >
-          Login
+          Verify and Log In
         </button>
       </form>
-
-      <p style={{ marginTop: "10px" }}>
-        <a href="/forgot-password">Forgot Password?</a>
-      </p>
     </main>
   );
 }
