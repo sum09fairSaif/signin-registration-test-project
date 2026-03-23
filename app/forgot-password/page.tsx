@@ -1,26 +1,60 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { Mail } from "lucide-react";
 import { requestPasswordReset } from "./actions";
 
 export default function ForgotPasswordPage() {
   const [message, setMessage] = useState("");
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
     const result = await requestPasswordReset(formData);
-    setMessage(result.message);
+
+    setMessage(result.message || "");
+    event.currentTarget.reset();
   }
 
   return (
-    <main style={{ maxWidth: "500px", margin: "40px auto" }}>
-      <h1>Forgot Password</h1>
+    <main className="auth-page">
+      <div className="auth-overlay" />
 
-      {message && <p>{message}</p>}
+      <section className="auth-card">
+        <h1 className="auth-title">Reset Password</h1>
+        <p className="auth-subtitle">
+          Enter your email and we&apos;ll send you a reset link.
+        </p>
 
-      <form action={handleSubmit}>
-        <input name="email" type="email" placeholder="Enter your email" />
-        <button type="submit">Send Reset Link</button>
-      </form>
+        {message && <p className="auth-success">{message}</p>}
+
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="auth-input-wrap">
+            <input
+              name="email"
+              type="email"
+              placeholder="Email"
+              className="auth-input"
+              autoComplete="email"
+              required
+            />
+            <Mail className="auth-input-icon" size={18} />
+          </div>
+
+          <button type="submit" className="auth-button">
+            Send Reset Link
+          </button>
+        </form>
+
+        <p className="auth-footer">
+          Remembered your password?{" "}
+          <Link href="/login" className="auth-link strong">
+            Back to Login
+          </Link>
+        </p>
+      </section>
     </main>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { ShieldCheck, Lock } from "lucide-react";
 import { verifyLoginCode } from "./actions";
 
 export default function VerifyLoginPage() {
@@ -29,66 +30,50 @@ export default function VerifyLoginPage() {
   }
 
   return (
-    <main
-      style={{
-        maxWidth: "500px",
-        margin: "40px auto",
-        fontFamily: "Arial, sans-serif",
-      }}
-    >
-      <h1>Verify Login</h1>
-      <p>Enter the verification code sent to your email.</p>
+    <main className="auth-page">
+      <div className="auth-overlay" />
 
-      {message && <p style={{ color: "green" }}>{message}</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      <section className="auth-card">
+        <h1 className="auth-title">Verify Login</h1>
+        <p className="auth-subtitle">
+          Enter the verification code sent to your email to complete login.
+        </p>
 
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "16px",
-          marginTop: "24px",
-        }}
-      >
-        <input type="hidden" name="email" value={email} />
+        {message && <p className="auth-success">{message}</p>}
+        {error && <p className="auth-error">{error}</p>}
 
-        <div>
-          <label>Verification Code</label>
-          <input
-            name="code"
-            type="text"
-            maxLength={6}
-            style={{
-              display: "block",
-              width: "100%",
-              padding: "8px",
-              marginTop: "6px",
-            }}
-          />
-        </div>
+        <form onSubmit={handleSubmit} className="auth-form">
+          <input type="hidden" name="email" value={email} />
 
-        <div>
-          <label>Password</label>
-          <input
-            name="password"
-            type="password"
-            style={{
-              display: "block",
-              width: "100%",
-              padding: "8px",
-              marginTop: "6px",
-            }}
-          />
-        </div>
+          <div className="auth-input-wrap">
+            <input
+              name="code"
+              type="text"
+              maxLength={6}
+              placeholder="Verification Code"
+              className="auth-input"
+              required
+            />
+            <ShieldCheck className="auth-input-icon" size={18} />
+          </div>
 
-        <button
-          type="submit"
-          style={{ padding: "10px 16px", cursor: "pointer" }}
-        >
-          Verify and Log In
-        </button>
-      </form>
+          <div className="auth-input-wrap">
+            <input
+              name="password"
+              type="password"
+              placeholder="Password"
+              className="auth-input"
+              autoComplete="current-password"
+              required
+            />
+            <Lock className="auth-input-icon" size={18} />
+          </div>
+
+          <button type="submit" className="auth-button">
+            Verify and Log In
+          </button>
+        </form>
+      </section>
     </main>
   );
 }
