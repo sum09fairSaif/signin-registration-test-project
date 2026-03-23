@@ -1,13 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { User, Lock } from "lucide-react";
 import { loginUser } from "./actions";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const verified = searchParams.get("verified");
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -31,74 +36,72 @@ export default function LoginPage() {
   }
 
   return (
-    <main
-      style={{
-        maxWidth: "500px",
-        margin: "40px auto",
-        fontFamily: "Arial, sans-serif",
-      }}
-    >
-      <h1>Login</h1>
+    <main className="auth-page">
+      <div className="auth-overlay" />
 
-      {message && <p style={{ color: "green" }}>{message}</p>}
+      <section className="auth-card">
+        <h1 className="auth-title">Login</h1>
+        <p className="auth-subtitle">
+          Welcome back. Sign in to continue securely.
+        </p>
 
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "16px",
-          marginTop: "24px",
-        }}
-      >
-        <div>
-          <label>Email</label>
-          <input
-            name="email"
-            type="email"
-            style={{
-              display: "block",
-              width: "100%",
-              padding: "8px",
-              marginTop: "6px",
-            }}
-          />
-        </div>
-
-        <div>
-          <label>Password</label>
-          <input
-            name="password"
-            type="password"
-            style={{
-              display: "block",
-              width: "100%",
-              padding: "8px",
-              marginTop: "6px",
-            }}
-          />
-        </div>
-
-        {error && (
-          <p style={{ color: "red", marginTop: "8px" }}>
-            {error}
+        {verified === "1" && !message && (
+          <p className="auth-success">
+            Email verified successfully. You can now log in.
           </p>
         )}
 
-        <button
-          type="submit"
-          style={{
-            padding: "10px 16px",
-            cursor: "pointer",
-          }}
-        >
-          Login
-        </button>
-      </form>
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="auth-input-wrap">
+            <input
+              name="email"
+              type="email"
+              placeholder="Email"
+              className="auth-input"
+              autoComplete="email"
+              required
+            />
+            <User className="auth-input-icon" size={18} />
+          </div>
 
-      <p style={{ marginTop: "10px" }}>
-        <a href="/forgot-password">Forgot Password?</a>
-      </p>
+          <div className="auth-input-wrap">
+            <input
+              name="password"
+              type="password"
+              placeholder="Password"
+              className="auth-input"
+              autoComplete="current-password"
+              required
+            />
+            <Lock className="auth-input-icon" size={18} />
+          </div>
+
+          <div className="auth-row">
+            <label className="remember-row">
+              <input type="checkbox" />
+              <span>Remember me</span>
+            </label>
+
+            <Link href="/forgot-password" className="auth-link">
+              Forgot Password?
+            </Link>
+          </div>
+
+          {error && <p className="auth-error">{error}</p>}
+          {message && <p className="auth-success">{message}</p>}
+
+          <button type="submit" className="auth-button">
+            Login
+          </button>
+        </form>
+
+        <p className="auth-footer">
+          Don&apos;t have an account?{" "}
+          <Link href="/signup" className="auth-link strong">
+            Register
+          </Link>
+        </p>
+      </section>
     </main>
   );
 }
