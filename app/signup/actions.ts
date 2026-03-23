@@ -8,7 +8,6 @@ export async function validateSignupForm(formData: FormData) {
   const rawData = {
     name: formData.get("name"),
     email: formData.get("email"),
-    phone: formData.get("phone"),
     password: formData.get("password"),
     confirmPassword: formData.get("confirmPassword"),
   };
@@ -22,7 +21,7 @@ export async function validateSignupForm(formData: FormData) {
     };
   }
 
-  const { name, email, phone, password } = result.data;
+  const { name, email, password } = result.data;
 
   const existingUserByEmail = await prisma.user.findUnique({
     where: { email },
@@ -35,26 +34,12 @@ export async function validateSignupForm(formData: FormData) {
     };
   }
 
-  if (phone && phone.trim() !== "") {
-    const existingUserByPhone = await prisma.user.findUnique({
-      where: { phone },
-    });
-
-    if (existingUserByPhone) {
-      return {
-        success: false,
-        errors: { phone: ["Phone number already registered"] },
-      };
-    }
-  }
-
   const hashedPassword = await argon2.hash(password);
 
   await prisma.user.create({
     data: {
       name,
       email,
-      phone: phone && phone.trim() !== "" ? phone : null,
       passwordHash: hashedPassword,
     },
   });

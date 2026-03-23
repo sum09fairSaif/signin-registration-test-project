@@ -57,12 +57,6 @@ export default function SignupPage() {
         </div>
 
         <div>
-          <label>Phone</label>
-          <input name="phone" type="tel" />
-          {errors.phone && <p style={{ color: "red" }}>{errors.phone[0]}</p>}
-        </div>
-
-        <div>
           <label>Password</label>
           <input name="password" type="password" />
           {errors.password && (
