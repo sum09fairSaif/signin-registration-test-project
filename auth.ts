@@ -29,6 +29,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
+        if (!user.emailVerified) {
+          return null;
+        }
+
         const passwordMatch = await argon2.verify(user.passwordHash, password);
 
         if (!passwordMatch) {

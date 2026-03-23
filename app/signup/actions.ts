@@ -3,6 +3,8 @@
 import { signupSchema } from "@/lib/validations/signup";
 import { prisma } from "@/lib/prisma";
 import argon2 from "argon2";
+import crypto from "crypto";
+import { sendEmailVerificationEmail } from "@/lib/email";
 
 export async function validateSignupForm(formData: FormData) {
   const rawData = {
@@ -41,11 +43,28 @@ export async function validateSignupForm(formData: FormData) {
       name,
       email,
       passwordHash: hashedPassword,
+      emailVerified: null,
     },
   });
 
+  const token = crypto.randomBytes(32).toString("hex");
+
+  await prisma.emailVerificationToken.deleteMany({
+    where: { email },
+  });
+
+  await prisma.emailVerificationToken.create({
+    data: {
+      email,
+      token,
+      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+    },
+  });
+
+  await sendEmailVerificationEmail(email, token);
+
   return {
     success: true,
-    message: "Account created successfully!",
+    message: "Account created. Please check your email to verify your account.",
   };
 }

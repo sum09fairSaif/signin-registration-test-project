@@ -39,3 +39,23 @@ export async function sendLoginOtpEmail(to: string, code: string) {
     throw new Error(error.message);
   }
 }
+
+export async function sendEmailVerificationEmail(to: string, token: string) {
+  const verifyUrl = `${process.env.APP_URL}/verify-email?token=${token}`;
+
+  const { error } = await resend.emails.send({
+    from: process.env.EMAIL_FROM!,
+    to,
+    subject: "Verify your email address",
+    html: `
+      <h2>Verify your email</h2>
+      <p>Click the link below to verify your account:</p>
+      <p><a href="${verifyUrl}">${verifyUrl}</a></p>
+      <p>This link will expire in 24 hours.</p>
+    `,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
