@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
+import { sendPasswordResetEmail } from "@/lib/email";
 
 export async function requestPasswordReset(formData: FormData) {
   const email = formData.get("email")?.toString() ?? "";
@@ -10,7 +11,6 @@ export async function requestPasswordReset(formData: FormData) {
     where: { email },
   });
 
-  // IMPORTANT: Always return same message
   if (!user) {
     return {
       message: "If an account exists, a reset link has been sent.",
@@ -23,11 +23,11 @@ export async function requestPasswordReset(formData: FormData) {
     data: {
       email,
       token,
-      expiresAt: new Date(Date.now() + 1000 * 60 * 15), // 15 min
+      expiresAt: new Date(Date.now() + 1000 * 60 * 15),
     },
   });
 
-  console.log(`RESET LINK: http://localhost:3000/reset-password?token=${token}`);
+  await sendPasswordResetEmail(email, token);
 
   return {
     message: "If an account exists, a reset link has been sent.",
