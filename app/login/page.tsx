@@ -63,11 +63,11 @@ export default function LoginPage() {
           />
         </div>
 
-        {error && (
-          <p style={{ color: "red", marginTop: "8px" }}>
-            {error}
-          </p>
-        )}
+        {error && <p style={{ color: "red", marginTop: "8px" }}>{error}</p>}
+
+        <p style={{ marginTop: "10px" }}>
+          <a href="/forgot-password">Forgot Password?</a>
+        </p>
 
         <button
           type="submit"
