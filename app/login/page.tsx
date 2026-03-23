@@ -5,19 +5,14 @@ import { loginUser } from "./actions";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   async function handleSubmit(formData: FormData) {
     const result = await loginUser(formData);
 
-    if (!result) return;
-
-    if (!result.success) {
+    if (result && !result.success) {
       setError(result.error || "Invalid email or password");
-      setSuccess("");
     } else {
       setError("");
-      setSuccess(result.message || "Login successful!");
     }
   }
 
@@ -30,11 +25,6 @@ export default function LoginPage() {
       }}
     >
       <h1>Login</h1>
-
-      {/* Success message */}
-      {success && (
-        <p style={{ color: "green", marginTop: "10px" }}>{success}</p>
-      )}
 
       <form
         action={handleSubmit}
@@ -73,8 +63,11 @@ export default function LoginPage() {
           />
         </div>
 
-        {/* 🔴 Global error message */}
-        {error && <p style={{ color: "red", marginTop: "8px" }}>{error}</p>}
+        {error && (
+          <p style={{ color: "red", marginTop: "8px" }}>
+            {error}
+          </p>
+        )}
 
         <button
           type="submit"
