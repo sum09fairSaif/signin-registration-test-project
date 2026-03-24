@@ -23,6 +23,13 @@ export async function loginUser(formData: FormData) {
     };
   }
 
+  if (!user.emailVerified) {
+    return {
+      success: false,
+      error: "Please verify your email before logging in.",
+    };
+  }
+
   const passwordMatch = await argon2.verify(user.passwordHash, password);
 
   if (!passwordMatch) {
@@ -42,7 +49,7 @@ export async function loginUser(formData: FormData) {
     data: {
       email,
       code,
-      expiresAt: new Date(Date.now() + 1000 * 60 * 10),
+      expiresAt: new Date(Date.now() + 1000 * 60 * 10), // 10 minutes
     },
   });
 

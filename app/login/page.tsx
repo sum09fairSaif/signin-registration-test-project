@@ -63,7 +63,7 @@ export default function LoginPage() {
             />
             <User className="auth-input-icon" size={18} />
           </div>
-
+        
           <div className="auth-input-wrap">
             <input
               name="password"

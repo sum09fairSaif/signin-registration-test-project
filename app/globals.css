@@ -18,7 +18,6 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Make sizing predictable */
 * {
   box-sizing: border-box;
 }
@@ -139,7 +138,7 @@ a {
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
 }
 
 .auth-input-wrap {
@@ -195,7 +194,6 @@ a {
   pointer-events: none;
 }
 
-/* For inputs without icons */
 .auth-input.no-icon {
   padding-right: 22px;
 }
@@ -252,11 +250,7 @@ a {
   height: 56px;
   border: none;
   border-radius: 999px;
-  background: linear-gradient(
-    135deg,
-    #ffffff,
-    #e6f7ff
-  );
+  background: linear-gradient(135deg, #ffffff, #e6f7ff);
   color: #0f2a38;
   font-size: 1.18rem;
   font-weight: 700;
@@ -279,8 +273,10 @@ a {
 }
 
 .auth-button:disabled {
-  opacity: 0.65;
+  opacity: 0.55;
   cursor: not-allowed;
+  transform: none;
+  filter: grayscale(0.08);
 }
 
 /* =========================
@@ -311,12 +307,12 @@ a {
   line-height: 1.45;
 }
 
-/* Field-level versions if needed later */
 .auth-field-error {
   margin: 8px 0 0;
   color: #ffd6d6;
   font-size: 0.9rem;
   line-height: 1.4;
+  text-align: left;
 }
 
 .auth-field-success {
@@ -324,6 +320,45 @@ a {
   color: #d9ffe7;
   font-size: 0.9rem;
   line-height: 1.4;
+}
+
+/* =========================
+   PASSWORD CHECKLIST
+   ========================= */
+
+.password-checklist {
+  margin-top: -2px;
+  margin-bottom: 2px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.password-rule {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.94rem;
+  line-height: 1.4;
+}
+
+.password-rule.passed {
+  color: #d9ffe7;
+}
+
+.password-rule-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.password-rule-icon.passed {
+  color: #bff5cf;
 }
 
 /* =========================
