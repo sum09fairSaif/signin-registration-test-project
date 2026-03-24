@@ -2,17 +2,14 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { User, Mail, Lock, Circle, CheckCircle2 } from "lucide-react";
 import { validateSignupForm } from "./actions";
 
 function Rule({ ok, text }: { ok: boolean; text: string }) {
   return (
     <div className={`password-rule ${ok ? "passed" : ""}`}>
-      {ok ? (
-        <CheckCircle2 size={18} />
-      ) : (
-        <Circle size={18} />
-      )}
+      {ok ? <CheckCircle2 size={18} /> : <Circle size={18} />}
       <span>{text}</span>
     </div>
   );
@@ -20,12 +17,12 @@ function Rule({ ok, text }: { ok: boolean; text: string }) {
 
 export default function SignupPage() {
   const [errors, setErrors] = useState<Record<string, string[]>>({});
-  const [success, setSuccess] = useState("");
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  const router = useRouter();
 
   const checks = useMemo(() => {
     return {
@@ -35,7 +32,10 @@ export default function SignupPage() {
       number: /[0-9]/.test(password),
       special: /[!._\-*#$&%\\?/^@]/.test(password),
       allowed: /^[A-Za-z0-9!._\-*#$&%\\?/^@]*$/.test(password),
-      match: password && confirmPassword && password === confirmPassword,
+      match:
+        password.length > 0 &&
+        confirmPassword.length > 0 &&
+        password === confirmPassword,
     };
   }, [password, confirmPassword]);
 
@@ -43,6 +43,7 @@ export default function SignupPage() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
     if (!allValid) return;
 
     const formData = new FormData(e.currentTarget);
@@ -52,11 +53,11 @@ export default function SignupPage() {
 
     if (!res.success) {
       setErrors(res.errors || {});
-      setSuccess("");
-    } else {
-      setErrors({});
-      setSuccess("Account created. Check your email to verify.");
+      return;
     }
+
+    setErrors({});
+    router.push(`/verify-email-sent?email=${encodeURIComponent(email)}`);
   }
 
   return (
@@ -69,18 +70,19 @@ export default function SignupPage() {
           Create your account and get started securely.
         </p>
 
-        {success && <p className="auth-success">{success}</p>}
-
         <form onSubmit={handleSubmit} className="auth-form">
           {/* NAME */}
           <div>
             <div className="auth-input-wrap">
               <input
                 name="name"
+                type="text"
                 placeholder="Full Name"
                 className="auth-input"
+                autoComplete="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                required
               />
               <User className="auth-input-icon" size={18} />
             </div>
@@ -95,8 +97,10 @@ export default function SignupPage() {
                 type="email"
                 placeholder="Email"
                 className="auth-input"
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
               />
               <Mail className="auth-input-icon" size={18} />
             </div>
@@ -111,25 +115,45 @@ export default function SignupPage() {
                 type="password"
                 placeholder="Create Password"
                 className="auth-input"
+                autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required
               />
               <Lock className="auth-input-icon" size={18} />
             </div>
+            {errors.password && (
+              <p className="auth-field-error">{errors.password[0]}</p>
+            )}
           </div>
 
-          {/* CHECKLIST */}
+          {/* PASSWORD CHECKLIST */}
           <div className="password-checklist">
-            <Rule ok={checks.length} text="At least 8 characters" />
-            <Rule ok={checks.lower} text="Contains lowercase letter" />
-            <Rule ok={checks.upper} text="Contains uppercase letter" />
-            <Rule ok={checks.number} text="Contains a number" />
-            <Rule ok={checks.special} text='Contains special (!._-*#$&%\\?/^@)' />
-            <Rule ok={checks.allowed} text="Only allowed characters used" />
+            <Rule ok={checks.length} text="Password is at least 8 characters long" />
+            <Rule
+              ok={checks.lower}
+              text="Password must contain at least one lowercase letter"
+            />
+            <Rule
+              ok={checks.upper}
+              text="Password must contain at least one uppercase letter"
+            />
+            <Rule
+              ok={checks.number}
+              text="Password must contain at least one number"
+            />
+            <Rule
+              ok={checks.special}
+              text='Password must contain at least one of these special characters "!._-*#$&%\\?/^@"'
+            />
+            <Rule
+              ok={checks.allowed}
+              text='Password only uses allowed characters: !._-*#$&%\\?/^@'
+            />
             <Rule ok={checks.match} text="Passwords match" />
           </div>
 
-          {/* CONFIRM */}
+          {/* CONFIRM PASSWORD */}
           <div>
             <div className="auth-input-wrap">
               <input
@@ -137,8 +161,10 @@ export default function SignupPage() {
                 type="password"
                 placeholder="Confirm Password"
                 className="auth-input"
+                autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
+                required
               />
               <Lock className="auth-input-icon" size={18} />
             </div>
@@ -147,7 +173,7 @@ export default function SignupPage() {
             )}
           </div>
 
-          <button className="auth-button" disabled={!allValid}>
+          <button type="submit" className="auth-button" disabled={!allValid}>
             Create Account
           </button>
         </form>
