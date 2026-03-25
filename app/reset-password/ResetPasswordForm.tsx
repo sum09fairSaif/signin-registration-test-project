@@ -106,22 +106,6 @@ export default function ResetPasswordForm({ token }: { token: string }) {
             </div>
           </div>
 
-          {/* Password Rules */}
-          <div className="password-checklist">
-            <Rule ok={checks.length} text="Password is at least 8 characters long" />
-            <Rule ok={checks.lower} text="At least one lowercase letter" />
-            <Rule ok={checks.upper} text="At least one uppercase letter" />
-            <Rule ok={checks.number} text="At least one number" />
-            <Rule
-              ok={checks.special}
-              text='At least one special character "!._-*#$&%\\?/^@"'
-            />
-            <Rule
-              ok={checks.allowed}
-              text="Only allowed characters are used"
-            />
-          </div>
-
           {/* Confirm Password */}
           <div>
             <div className="auth-input-wrap">
@@ -139,8 +123,20 @@ export default function ResetPasswordForm({ token }: { token: string }) {
             </div>
           </div>
 
-          {/* Match Rule */}
+          {/* Password Rule Checks */}
           <div className="password-checklist">
+            <Rule
+              ok={checks.length}
+              text="Password is at least 8 characters long"
+            />
+            <Rule ok={checks.lower} text="At least one lowercase letter" />
+            <Rule ok={checks.upper} text="At least one uppercase letter" />
+            <Rule ok={checks.number} text="At least one number" />
+            <Rule
+              ok={checks.special}
+              text='At least one special character "!._-*#$&%\\?/^@"'
+            />
+            <Rule ok={checks.allowed} text="Only allowed characters are used" />
             <Rule ok={checks.match} text="Passwords match" />
           </div>
 

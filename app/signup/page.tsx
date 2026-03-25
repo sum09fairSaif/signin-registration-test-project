@@ -127,6 +127,26 @@ export default function SignupPage() {
             )}
           </div>
 
+          {/* CONFIRM PASSWORD */}
+          <div>
+            <div className="auth-input-wrap">
+              <input
+                name="confirmPassword"
+                type="password"
+                placeholder="Confirm Password"
+                className="auth-input"
+                autoComplete="new-password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+              <Lock className="auth-input-icon" size={18} />
+            </div>
+            {errors.confirmPassword && (
+              <p className="auth-field-error">{errors.confirmPassword[0]}</p>
+            )}
+          </div>
+
           {/* PASSWORD CHECKLIST */}
           <div className="password-checklist">
             <Rule ok={checks.length} text="Password is at least 8 characters long" />
@@ -151,26 +171,6 @@ export default function SignupPage() {
               text='Password only uses allowed characters: !._-*#$&%\\?/^@'
             />
             <Rule ok={checks.match} text="Passwords match" />
-          </div>
-
-          {/* CONFIRM PASSWORD */}
-          <div>
-            <div className="auth-input-wrap">
-              <input
-                name="confirmPassword"
-                type="password"
-                placeholder="Confirm Password"
-                className="auth-input"
-                autoComplete="new-password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-              <Lock className="auth-input-icon" size={18} />
-            </div>
-            {errors.confirmPassword && (
-              <p className="auth-field-error">{errors.confirmPassword[0]}</p>
-            )}
           </div>
 
           <button type="submit" className="auth-button" disabled={!allValid}>
