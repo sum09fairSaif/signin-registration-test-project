@@ -24,7 +24,6 @@ model User {
   updatedAt      DateTime @updatedAt
 }
 
-
 model PasswordResetToken {
   id        String   @id @default(uuid())
   email     String
@@ -33,20 +32,19 @@ model PasswordResetToken {
   createdAt DateTime @default(now())
 }
 
-
-model LoginVerificationToken {
-  id        String   @id @default(uuid())
-  email     String
-  code      String
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-}
-
-
 model EmailVerificationToken {
   id        String   @id @default(uuid())
   email     String
   token     String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
+}
+
+model LoginVerificationToken {
+  id         String   @id @default(uuid())
+  email      String
+  code       String
+  loginToken String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
 }

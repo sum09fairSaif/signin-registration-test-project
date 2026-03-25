@@ -9,6 +9,9 @@ import { loginUser } from "./actions";
 export default function LoginPage() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -17,7 +20,10 @@ export default function LoginPage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const formData = new FormData(event.currentTarget);
+    const formData = new FormData();
+    formData.append("email", email);
+    formData.append("password", password);
+
     const result = await loginUser(formData);
 
     if (!result) return;
@@ -31,7 +37,12 @@ export default function LoginPage() {
     if (result.requiresOtp) {
       setError("");
       setMessage(result.message || "");
-      router.push(`/verify-login?email=${encodeURIComponent(result.email)}`);
+
+      router.push(
+        `/verify-login?email=${encodeURIComponent(
+          result.email
+        )}&loginToken=${encodeURIComponent(result.loginToken)}`
+      );
     }
   }
 
@@ -52,28 +63,36 @@ export default function LoginPage() {
         )}
 
         <form onSubmit={handleSubmit} className="auth-form">
-          <div className="auth-input-wrap">
-            <input
-              name="email"
-              type="email"
-              placeholder="Email"
-              className="auth-input"
-              autoComplete="email"
-              required
-            />
-            <User className="auth-input-icon" size={18} />
+          <div>
+            <div className="auth-input-wrap">
+              <input
+                name="email"
+                type="email"
+                placeholder="Email"
+                className="auth-input"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <User className="auth-input-icon" size={18} />
+            </div>
           </div>
-        
-          <div className="auth-input-wrap">
-            <input
-              name="password"
-              type="password"
-              placeholder="Password"
-              className="auth-input"
-              autoComplete="current-password"
-              required
-            />
-            <Lock className="auth-input-icon" size={18} />
+
+          <div>
+            <div className="auth-input-wrap">
+              <input
+                name="password"
+                type="password"
+                placeholder="Password"
+                className="auth-input"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <Lock className="auth-input-icon" size={18} />
+            </div>
           </div>
 
           <div className="auth-row">

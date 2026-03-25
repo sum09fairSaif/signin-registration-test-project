@@ -1,79 +1,61 @@
-"use client";
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+import ResetPasswordForm from "./ResetPasswordForm";
 
-import { useSearchParams } from "next/navigation";
-import { useState } from "react";
-import { ShieldCheck, Lock } from "lucide-react";
-import { verifyLoginCode } from "./actions";
+type ResetPasswordPageProps = {
+  searchParams: Promise<{ token?: string }>;
+};
 
-export default function VerifyLoginPage() {
-  const params = useSearchParams();
-  const email = params.get("email") ?? "";
+export default async function ResetPasswordPage({
+  searchParams,
+}: ResetPasswordPageProps) {
+  const { token } = await searchParams;
 
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  if (!token) {
+    return (
+      <main className="auth-page">
+        <div className="auth-overlay" />
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+        <section className="auth-card" style={{ textAlign: "center" }}>
+          <h1 className="auth-title">Invalid Link</h1>
+          <p className="auth-subtitle">
+            This reset password link is invalid.
+          </p>
 
-    const formData = new FormData(event.currentTarget);
-    const result = await verifyLoginCode(formData);
-
-    if (!result) return;
-
-    if (!result.success) {
-      setError(result.error || "Invalid or expired code.");
-      setMessage("");
-    } else {
-      setError("");
-      setMessage(result.message || "Verification successful.");
-    }
+          <div style={{ marginTop: "24px" }}>
+            <Link href="/login" className="auth-button">
+              Back to Login
+            </Link>
+          </div>
+        </section>
+      </main>
+    );
   }
 
-  return (
-    <main className="auth-page">
-      <div className="auth-overlay" />
+  const resetRecord = await prisma.passwordResetToken.findUnique({
+    where: { token },
+  });
 
-      <section className="auth-card">
-        <h1 className="auth-title">Verify Login</h1>
-        <p className="auth-subtitle">
-          Enter the verification code sent to your email to complete login.
-        </p>
+  if (!resetRecord || resetRecord.expiresAt < new Date()) {
+    return (
+      <main className="auth-page">
+        <div className="auth-overlay" />
 
-        {message && <p className="auth-success">{message}</p>}
-        {error && <p className="auth-error">{error}</p>}
+        <section className="auth-card" style={{ textAlign: "center" }}>
+          <h1 className="auth-title">Link Expired</h1>
+          <p className="auth-subtitle">
+            This reset password link has expired or is no longer valid.
+          </p>
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          <input type="hidden" name="email" value={email} />
-
-          <div className="auth-input-wrap">
-            <input
-              name="code"
-              type="text"
-              maxLength={6}
-              placeholder="Verification Code"
-              className="auth-input"
-              required
-            />
-            <ShieldCheck className="auth-input-icon" size={18} />
+          <div style={{ marginTop: "24px" }}>
+            <Link href="/login" className="auth-button">
+              Back to Login
+            </Link>
           </div>
+        </section>
+      </main>
+    );
+  }
 
-          <div className="auth-input-wrap">
-            <input
-              name="password"
-              type="password"
-              placeholder="Password"
-              className="auth-input"
-              autoComplete="current-password"
-              required
-            />
-            <Lock className="auth-input-icon" size={18} />
-          </div>
-
-          <button type="submit" className="auth-button">
-            Verify and Log In
-          </button>
-        </form>
-      </section>
-    </main>
-  );
+  return <ResetPasswordForm token={token} />;
 }

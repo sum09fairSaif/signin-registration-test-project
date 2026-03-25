@@ -3,19 +3,33 @@
 import { prisma } from "@/lib/prisma";
 import argon2 from "argon2";
 
-export async function resetPassword(formData: FormData, token: string) {
+export async function resetPassword(formData: FormData) {
+  const token = formData.get("token")?.toString() ?? "";
   const password = formData.get("password")?.toString() ?? "";
+
+  if (!token) {
+    return {
+      success: false,
+      error: "Invalid or missing reset token.",
+    };
+  }
 
   const resetRecord = await prisma.passwordResetToken.findUnique({
     where: { token },
   });
 
   if (!resetRecord) {
-    return { message: "Invalid or expired token" };
+    return {
+      success: false,
+      error: "This reset link is invalid or expired.",
+    };
   }
 
   if (resetRecord.expiresAt < new Date()) {
-    return { message: "Token expired" };
+    return {
+      success: false,
+      error: "This reset link has expired. Please request a new one.",
+    };
   }
 
   const hashedPassword = await argon2.hash(password);
@@ -29,5 +43,8 @@ export async function resetPassword(formData: FormData, token: string) {
     where: { token },
   });
 
-  return { message: "Password reset successful!" };
+  return {
+    success: true,
+    message: "Password reset successful. Redirecting to login...",
+  };
 }

@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import argon2 from "argon2";
+import crypto from "crypto";
 import { sendLoginOtpEmail } from "@/lib/email";
 
 function generateSixDigitCode() {
@@ -40,6 +41,7 @@ export async function loginUser(formData: FormData) {
   }
 
   const code = generateSixDigitCode();
+  const loginToken = crypto.randomBytes(32).toString("hex");
 
   await prisma.loginVerificationToken.deleteMany({
     where: { email },
@@ -49,7 +51,8 @@ export async function loginUser(formData: FormData) {
     data: {
       email,
       code,
-      expiresAt: new Date(Date.now() + 1000 * 60 * 10), // 10 minutes
+      loginToken,
+      expiresAt: new Date(Date.now() + 1000 * 60 * 10),
     },
   });
 
@@ -59,6 +62,7 @@ export async function loginUser(formData: FormData) {
     success: true,
     requiresOtp: true,
     email,
+    loginToken,
     message: "A verification code has been sent to your email.",
   };
 }

@@ -1,30 +1,51 @@
-"use client";
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+import ResetPasswordForm from "./ResetPasswordForm";
 
-import { useSearchParams } from "next/navigation";
-import { useState } from "react";
-import { resetPassword } from "./actions";
+type Props = {
+  searchParams: Promise<{ token?: string }>;
+};
 
-export default function ResetPasswordPage() {
-  const params = useSearchParams();
-  const token = params.get("token");
+export default async function ResetPasswordPage({ searchParams }: Props) {
+  const { token } = await searchParams;
 
-  const [message, setMessage] = useState("");
-
-  async function handleSubmit(formData: FormData) {
-    const result = await resetPassword(formData, token || "");
-    setMessage(result.message);
+  if (!token) {
+    return (
+      <main className="auth-page">
+        <div className="auth-overlay" />
+        <section className="auth-card" style={{ textAlign: "center" }}>
+          <h1 className="auth-title">Invalid Link</h1>
+          <p className="auth-subtitle">
+            This reset password link is invalid.
+          </p>
+          <Link href="/login" className="auth-button" style={{ marginTop: "20px" }}>
+            Back to Login
+          </Link>
+        </section>
+      </main>
+    );
   }
 
-  return (
-    <main style={{ maxWidth: "500px", margin: "40px auto" }}>
-      <h1>Reset Password</h1>
+  const record = await prisma.passwordResetToken.findUnique({
+    where: { token },
+  });
 
-      {message && <p>{message}</p>}
+  if (!record || record.expiresAt < new Date()) {
+    return (
+      <main className="auth-page">
+        <div className="auth-overlay" />
+        <section className="auth-card" style={{ textAlign: "center" }}>
+          <h1 className="auth-title">Link Expired</h1>
+          <p className="auth-subtitle">
+            This reset password link has expired or is no longer valid.
+          </p>
+          <Link href="/login" className="auth-button" style={{ marginTop: "20px" }}>
+            Back to Login
+          </Link>
+        </section>
+      </main>
+    );
+  }
 
-      <form action={handleSubmit}>
-        <input name="password" type="password" placeholder="New password" />
-        <button type="submit">Reset Password</button>
-      </form>
-    </main>
-  );
+  return <ResetPasswordForm token={token} />;
 }
