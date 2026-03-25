@@ -149,27 +149,18 @@ export default function SignupPage() {
 
           {/* PASSWORD CHECKLIST */}
           <div className="password-checklist">
-            <Rule ok={checks.length} text="Password is at least 8 characters long" />
             <Rule
-              ok={checks.lower}
-              text="Password must contain at least one lowercase letter"
+              ok={checks.length}
+              text="Password is at least 8 characters long"
             />
-            <Rule
-              ok={checks.upper}
-              text="Password must contain at least one uppercase letter"
-            />
-            <Rule
-              ok={checks.number}
-              text="Password must contain at least one number"
-            />
+            <Rule ok={checks.lower} text="At least one lowercase letter" />
+            <Rule ok={checks.upper} text="At least one uppercase letter" />
+            <Rule ok={checks.number} text="At least one number" />
             <Rule
               ok={checks.special}
-              text='Password must contain at least one of these special characters "!._-*#$&%\\?/^@"'
+              text='At least one special character "!._-*#$&%\\?/^@"'
             />
-            <Rule
-              ok={checks.allowed}
-              text='Password only uses allowed characters: !._-*#$&%\\?/^@'
-            />
+            <Rule ok={checks.allowed} text="Only allowed characters are used" />
             <Rule ok={checks.match} text="Passwords match" />
           </div>
 
