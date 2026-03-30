@@ -9,7 +9,7 @@ import {
   Mail,
   User,
   CalendarDays,
-  BadgeCheck,
+  NotebookPen,
 } from "lucide-react";
 
 export default async function DashboardPage() {
@@ -30,7 +30,11 @@ export default async function DashboardPage() {
 
   const displayName = user.name || "there";
   const avatarSrc = user.image || createAvatarDataUrl(user.name || user.email);
-  const loginVerificationStatus = session ? "Verified for this session" : "Pending";
+  const memberSince = new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  }).format(user.createdAt);
   const profileSummary = [
     user.age ? `${user.age} years old` : null,
     user.gender ? user.gender[0].toUpperCase() + user.gender.slice(1) : null,
@@ -55,11 +59,9 @@ export default async function DashboardPage() {
             </div>
 
             <div>
-              <p className="dashboard-eyebrow">Protected Dashboard</p>
               <h1 className="dashboard-title">Welcome back, {displayName}!</h1>
               <p className="dashboard-subtitle">
-                Your account is signed in and verified. You can manage only the
-                profile details allowed for your account here.
+                You are signed in and verified.
               </p>
               {profileSummary && (
                 <p className="dashboard-summary">{profileSummary}</p>
@@ -68,9 +70,6 @@ export default async function DashboardPage() {
           </div>
 
           <div className="dashboard-header-actions">
-            <p className="dashboard-subtitle">
-              Signed in securely with email verification completed.
-            </p>
             <LogoutButton />
           </div>
         </div>
@@ -84,8 +83,7 @@ export default async function DashboardPage() {
             <div>
               <h2 className="dashboard-card-title">Account Overview</h2>
               <p className="dashboard-card-text">
-                Your dashboard now shows the profile data you are allowed to
-                manage and nothing else.
+                Your dashboard now shows your profile data.
               </p>
             </div>
           </div>
@@ -119,11 +117,13 @@ export default async function DashboardPage() {
           <div className="dashboard-card">
             <div className="dashboard-item">
               <div className="dashboard-item-icon">
-                <BadgeCheck size={18} />
+                <NotebookPen size={18} />
               </div>
               <div>
-                <p className="dashboard-label">Login Verification Status</p>
-                <p className="dashboard-value">{loginVerificationStatus}</p>
+                <p className="dashboard-label">Short Bio</p>
+                <p className="dashboard-value">
+                  {user.bio || "Add a short bio to introduce yourself"}
+                </p>
               </div>
             </div>
           </div>
@@ -134,10 +134,8 @@ export default async function DashboardPage() {
                 <CalendarDays size={18} />
               </div>
               <div>
-                <p className="dashboard-label">Profile Picture</p>
-                <p className="dashboard-value">
-                  {user.image ? "Custom image selected" : "Random avatar active"}
-                </p>
+                <p className="dashboard-label">Member Since</p>
+                <p className="dashboard-value">{memberSince}</p>
               </div>
             </div>
           </div>
@@ -148,6 +146,9 @@ export default async function DashboardPage() {
             initialAge={user.age}
             initialGender={user.gender}
             initialImage={user.image}
+            initialHomeAddress={user.homeAddress}
+            initialWorkAddress={user.workAddress}
+            initialBio={user.bio}
           />
         </div>
       </section>

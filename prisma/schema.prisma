@@ -21,6 +21,9 @@ model User {
   age            Int?
   gender         String?
   image          String?
+  homeAddress    String?
+  workAddress    String?
+  bio            String?
   emailVerified  DateTime?
   phoneVerified  DateTime?
   createdAt      DateTime @default(now())

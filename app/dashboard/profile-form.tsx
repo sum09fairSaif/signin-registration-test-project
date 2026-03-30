@@ -11,6 +11,9 @@ type ProfileFormProps = {
   initialAge: number | null;
   initialGender: string | null;
   initialImage: string | null;
+  initialHomeAddress: string | null;
+  initialWorkAddress: string | null;
+  initialBio: string | null;
 };
 
 const acceptedImageTypes = new Set([
@@ -27,11 +30,17 @@ export default function ProfileForm({
   initialAge,
   initialGender,
   initialImage,
+  initialHomeAddress,
+  initialWorkAddress,
+  initialBio,
 }: ProfileFormProps) {
   const [name, setName] = useState(initialName);
   const [age, setAge] = useState(initialAge?.toString() ?? "");
   const [gender, setGender] = useState(initialGender ?? "");
   const [image, setImage] = useState(initialImage ?? "");
+  const [homeAddress, setHomeAddress] = useState(initialHomeAddress ?? "");
+  const [workAddress, setWorkAddress] = useState(initialWorkAddress ?? "");
+  const [bio, setBio] = useState(initialBio ?? "");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -161,6 +170,9 @@ export default function ProfileForm({
       formData.append("age", age);
       formData.append("gender", gender);
       formData.append("image", image);
+      formData.append("homeAddress", homeAddress);
+      formData.append("workAddress", workAddress);
+      formData.append("bio", bio);
 
       const result = await updateProfile(formData);
 
@@ -188,7 +200,7 @@ export default function ProfileForm({
         <div>
           <h2 className="dashboard-card-title">Edit Profile</h2>
           <p className="dashboard-card-text">
-            You can update your name, age, gender, and profile picture only.
+            You can update your name, age, gender, addresses, bio, and profile picture here.
           </p>
         </div>
       </div>
@@ -300,6 +312,44 @@ export default function ProfileForm({
               </select>
             </label>
           </div>
+
+          <label className="dashboard-field">
+            <span className="dashboard-field-label">Home Address</span>
+            <input
+              type="text"
+              className="dashboard-input"
+              value={homeAddress}
+              onChange={(event) => setHomeAddress(event.target.value)}
+              disabled={isPending}
+              maxLength={180}
+              placeholder="Enter your home address"
+            />
+          </label>
+
+          <label className="dashboard-field">
+            <span className="dashboard-field-label">Work Address</span>
+            <input
+              type="text"
+              className="dashboard-input"
+              value={workAddress}
+              onChange={(event) => setWorkAddress(event.target.value)}
+              disabled={isPending}
+              maxLength={180}
+              placeholder="Enter your work address"
+            />
+          </label>
+
+          <label className="dashboard-field">
+            <span className="dashboard-field-label">Short Bio</span>
+            <textarea
+              className="dashboard-input dashboard-textarea"
+              value={bio}
+              onChange={(event) => setBio(event.target.value)}
+              disabled={isPending}
+              maxLength={280}
+              placeholder="Write a short bio about yourself"
+            />
+          </label>
 
           {error && <p className="auth-error">{error}</p>}
           {message && <p className="auth-success">{message}</p>}

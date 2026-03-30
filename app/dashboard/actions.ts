@@ -21,6 +21,9 @@ export async function updateProfile(formData: FormData) {
   const ageValue = formData.get("age")?.toString().trim() ?? "";
   const genderValue = formData.get("gender")?.toString().trim().toLowerCase() ?? "";
   const imageValue = formData.get("image")?.toString().trim() ?? "";
+  const homeAddressValue = formData.get("homeAddress")?.toString().trim() ?? "";
+  const workAddressValue = formData.get("workAddress")?.toString().trim() ?? "";
+  const bioValue = formData.get("bio")?.toString().trim() ?? "";
 
   if (!name || name.length < 2) {
     return {
@@ -42,6 +45,27 @@ export async function updateProfile(formData: FormData) {
     return {
       success: false,
       error: "Choose Male, Female, or Other.",
+    };
+  }
+
+  if (homeAddressValue.length > 180) {
+    return {
+      success: false,
+      error: "Home address must be 180 characters or fewer.",
+    };
+  }
+
+  if (workAddressValue.length > 180) {
+    return {
+      success: false,
+      error: "Work address must be 180 characters or fewer.",
+    };
+  }
+
+  if (bioValue.length > 280) {
+    return {
+      success: false,
+      error: "Short bio must be 280 characters or fewer.",
     };
   }
 
@@ -67,6 +91,9 @@ export async function updateProfile(formData: FormData) {
       age,
       gender: genderValue || null,
       image: imageValue || null,
+      homeAddress: homeAddressValue || null,
+      workAddress: workAddressValue || null,
+      bio: bioValue || null,
     },
   });
 
