@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Camera, Save } from "lucide-react";
+import { useRef, useState, useTransition } from "react";
+import { Camera, HardDriveUpload, Save, Upload } from "lucide-react";
 import { updateProfile } from "./actions";
 import { createAvatarDataUrl } from "@/lib/avatar";
 
@@ -12,6 +12,14 @@ type ProfileFormProps = {
   initialGender: string | null;
   initialImage: string | null;
 };
+
+const acceptedImageTypes = new Set([
+  "image/png",
+  "image/jpeg",
+  "image/jpg",
+  "image/webp",
+  "image/gif",
+]);
 
 export default function ProfileForm({
   initialName,
@@ -27,8 +35,122 @@ export default function ProfileForm({
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [isPending, startTransition] = useTransition();
+  const [showPictureTools, setShowPictureTools] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const previewImage = image.trim() || createAvatarDataUrl(name || email);
+
+  async function readFileAsDataUrl(file: File) {
+    return await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        if (typeof reader.result === "string") {
+          resolve(reader.result);
+          return;
+        }
+
+        reject(new Error("Could not read the selected image."));
+      };
+
+      reader.onerror = () => reject(new Error("Could not read the selected image."));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function compressImage(file: File) {
+    const source = await readFileAsDataUrl(file);
+
+    return await new Promise<string>((resolve, reject) => {
+      const imageElement = new Image();
+
+      imageElement.onload = () => {
+        const maxSize = 420;
+        const scale = Math.min(
+          1,
+          maxSize / imageElement.width,
+          maxSize / imageElement.height
+        );
+        const width = Math.max(1, Math.round(imageElement.width * scale));
+        const height = Math.max(1, Math.round(imageElement.height * scale));
+        const canvas = document.createElement("canvas");
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const context = canvas.getContext("2d");
+
+        if (!context) {
+          reject(new Error("Could not prepare the selected image."));
+          return;
+        }
+
+        context.drawImage(imageElement, 0, 0, width, height);
+
+        const compressed = canvas.toDataURL("image/jpeg", 0.72);
+
+        if (compressed.length > 850_000) {
+          reject(new Error("Please choose a smaller image."));
+          return;
+        }
+
+        resolve(compressed);
+      };
+
+      imageElement.onerror = () =>
+        reject(new Error("Could not process the selected image."));
+      imageElement.src = source;
+    });
+  }
+
+  async function applyImageFile(file: File) {
+    if (!acceptedImageTypes.has(file.type)) {
+      setError("Use a PNG, JPG, WEBP, or GIF image.");
+      setMessage("");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Profile pictures must be 5 MB or smaller.");
+      setMessage("");
+      return;
+    }
+
+    try {
+      const dataUrl = await compressImage(file);
+      setImage(dataUrl);
+      setError("");
+      setMessage("Profile picture selected. Save changes to apply it.");
+    } catch {
+      setError("Could not read the selected image.");
+      setMessage("");
+    }
+  }
+
+  async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    await applyImageFile(file);
+    event.target.value = "";
+  }
+
+  async function handleDrop(event: React.DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    setIsDragging(false);
+
+    const file = event.dataTransfer.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    await applyImageFile(file);
+  }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -72,7 +194,7 @@ export default function ProfileForm({
       </div>
 
       <div className="dashboard-editor-layout">
-          <div className="dashboard-avatar-panel">
+        <div className="dashboard-avatar-panel">
           <div className="dashboard-avatar-frame">
             <div
               role="img"
@@ -81,9 +203,48 @@ export default function ProfileForm({
               style={{ backgroundImage: `url("${previewImage}")` }}
             />
           </div>
-          <p className="dashboard-avatar-note">
-            Leave the profile picture blank to use a generated avatar.
-          </p>
+
+          <button
+            type="button"
+            className="dashboard-picture-btn"
+            onClick={() => setShowPictureTools((current) => !current)}
+          >
+            Change Profile Picture
+          </button>
+
+          {showPictureTools && (
+            <div className="dashboard-picture-tools">
+              <div
+                className={`dashboard-dropzone ${isDragging ? "dragging" : ""}`}
+                onDragOver={(event) => {
+                  event.preventDefault();
+                  setIsDragging(true);
+                }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={handleDrop}
+              >
+                <HardDriveUpload size={22} />
+                <p>Drag and drop an image here</p>
+              </div>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+                hidden
+                onChange={handleFileChange}
+              />
+
+              <button
+                type="button"
+                className="dashboard-picture-option"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload size={18} />
+                Upload From Computer
+              </button>
+            </div>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="dashboard-form">
@@ -140,22 +301,14 @@ export default function ProfileForm({
             </label>
           </div>
 
-          <label className="dashboard-field">
-            <span className="dashboard-field-label">Profile Picture URL</span>
-            <input
-              type="url"
-              className="dashboard-input"
-              value={image}
-              onChange={(event) => setImage(event.target.value)}
-              disabled={isPending}
-              placeholder="https://example.com/photo.jpg"
-            />
-          </label>
-
           {error && <p className="auth-error">{error}</p>}
           {message && <p className="auth-success">{message}</p>}
 
-          <button type="submit" className="dashboard-save-btn" disabled={isPending}>
+          <button
+            type="submit"
+            className="dashboard-save-btn"
+            disabled={isPending}
+          >
             <Save size={18} />
             {isPending ? "Saving..." : "Save Changes"}
           </button>

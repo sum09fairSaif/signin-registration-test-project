@@ -1,4 +1,4 @@
-export function createAvatarDataUrl(_seed: string) {
+export function createAvatarDataUrl() {
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240" role="img" aria-label="User avatar">
       <defs>

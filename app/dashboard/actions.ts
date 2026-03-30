@@ -46,13 +46,17 @@ export async function updateProfile(formData: FormData) {
   }
 
   if (imageValue) {
-    try {
-      new URL(imageValue);
-    } catch {
-      return {
-        success: false,
-        error: "Profile picture must be a valid URL.",
-      };
+    const isDataImage = imageValue.startsWith("data:image/");
+
+    if (!isDataImage) {
+      try {
+        new URL(imageValue);
+      } catch {
+        return {
+          success: false,
+          error: "Profile picture must be a valid image upload.",
+        };
+      }
     }
   }
 
