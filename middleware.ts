@@ -1,29 +1,41 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 
-export function middleware(request: NextRequest) {
+const publicRoutes = [
+  "/login",
+  "/signup",
+  "/verify-email",
+  "/verify-login",
+  "/reset-password",
+];
+
+export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const publicRoutes = [
-    "/login",
-    "/signup",
-    "/verify-email",
-    "/verify-login",
-    "/reset-password",
-  ];
-
-  const isPublic = publicRoutes.some((route) =>
+  const isPublicRoute = publicRoutes.some((route) =>
     pathname.startsWith(route)
   );
 
-  if (isPublic) {
+  if (isPublicRoute) {
     return NextResponse.next();
   }
 
-  return NextResponse.redirect(new URL("/login", request.url));
+  const token = await getToken({
+    req: request,
+    secret: process.env.AUTH_SECRET,
+  });
+
+  if (token) {
+    return NextResponse.next();
+  }
+
+  const loginUrl = new URL("/login", request.url);
+  loginUrl.searchParams.set("callbackUrl", request.nextUrl.href);
+  return NextResponse.redirect(loginUrl);
 }
 
 /* Apply to all routes */
 export const config = {
-  matcher: ["/((?!_next|favicon.ico|images).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|images).*)"],
 };

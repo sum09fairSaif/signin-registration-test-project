@@ -8,13 +8,14 @@ export default function LogoutButton() {
 
   return (
     <button
+      type="button"
+      className="dashboard-logout-btn"
       onClick={() =>
         startTransition(() => {
           signOut({ callbackUrl: "/login" });
         })
       }
       disabled={isPending}
-      style={{ padding: "10px 16px", cursor: "pointer", marginTop: "16px" }}
     >
       {isPending ? "Logging out..." : "Log Out"}
     </button>
