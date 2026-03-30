@@ -52,5 +52,7 @@ model LoginVerificationToken {
   code       String
   loginToken String   @unique
   expiresAt  DateTime
+  lastSentAt DateTime @default(now())
+  resendCount Int     @default(0)
   createdAt  DateTime @default(now())
 }

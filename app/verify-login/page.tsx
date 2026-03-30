@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Lock, Mail } from "lucide-react";
@@ -10,6 +10,7 @@ export default function VerifyLoginPage() {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [resendSecondsLeft, setResendSecondsLeft] = useState(60);
   const [isSubmitting, startSubmitting] = useTransition();
   const [isResending, startResending] = useTransition();
 
@@ -19,6 +20,24 @@ export default function VerifyLoginPage() {
   const email = searchParams.get("email")?.trim() ?? "";
   const loginToken = searchParams.get("loginToken")?.trim() ?? "";
   const missingParams = !email || !loginToken;
+
+  useEffect(() => {
+    if (resendSecondsLeft <= 0) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setResendSecondsLeft((current) => Math.max(0, current - 1));
+    }, 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [resendSecondsLeft]);
+
+  function formatCountdown(totalSeconds: number) {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  }
 
   function buildFormData() {
     const formData = new FormData();
@@ -77,11 +96,15 @@ export default function VerifyLoginPage() {
       if (!result.success) {
         setError(result.error || "Could not resend the verification code.");
         setMessage("");
+        if (typeof result.resendSecondsLeft === "number") {
+          setResendSecondsLeft(result.resendSecondsLeft);
+        }
         return;
       }
 
       setError("");
       setMessage(result.message || "A new verification code has been sent.");
+      setResendSecondsLeft(result.resendSecondsLeft ?? 60);
     });
   }
 
@@ -152,9 +175,10 @@ export default function VerifyLoginPage() {
               className="auth-input"
               autoComplete="one-time-code"
               value={code}
-              onChange={(event) =>
-                setCode(event.target.value.replace(/\D/g, "").slice(0, 6))
-              }
+              onChange={(event) => {
+                setCode(event.target.value.replace(/\D/g, "").slice(0, 6));
+                setError("");
+              }}
               required
               disabled={isSubmitting}
             />
@@ -171,16 +195,21 @@ export default function VerifyLoginPage() {
           <button
             type="button"
             onClick={handleResendCode}
-            disabled={isResending}
+            disabled={isResending || resendSecondsLeft > 0}
             className="auth-link strong"
             style={{
               background: "none",
               border: "none",
               padding: 0,
-              cursor: isResending ? "default" : "pointer",
+              cursor:
+                isResending || resendSecondsLeft > 0 ? "default" : "pointer",
             }}
           >
-            {isResending ? "Sending..." : "Resend it"}
+            {isResending
+              ? "Sending..."
+              : resendSecondsLeft > 0
+                ? `Resend in ${formatCountdown(resendSecondsLeft)}`
+                : "Resend it"}
           </button>
         </p>
 

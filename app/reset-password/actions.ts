@@ -14,9 +14,19 @@ export async function resetPassword(formData: FormData) {
     };
   }
 
-  const resetRecord = await prisma.passwordResetToken.findUnique({
-    where: { token },
-  });
+  let resetRecord;
+
+  try {
+    resetRecord = await prisma.passwordResetToken.findUnique({
+      where: { token },
+    });
+  } catch {
+    return {
+      success: false,
+      error:
+        "We couldn't verify your reset link right now. Please try again in a moment.",
+    };
+  }
 
   if (!resetRecord) {
     return {
@@ -34,14 +44,22 @@ export async function resetPassword(formData: FormData) {
 
   const hashedPassword = await argon2.hash(password);
 
-  await prisma.user.update({
-    where: { email: resetRecord.email },
-    data: { passwordHash: hashedPassword },
-  });
+  try {
+    await prisma.user.update({
+      where: { email: resetRecord.email },
+      data: { passwordHash: hashedPassword },
+    });
 
-  await prisma.passwordResetToken.delete({
-    where: { token },
-  });
+    await prisma.passwordResetToken.delete({
+      where: { token },
+    });
+  } catch {
+    return {
+      success: false,
+      error:
+        "We couldn't reset your password right now. Please try again in a moment.",
+    };
+  }
 
   return {
     success: true,

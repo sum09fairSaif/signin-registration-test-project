@@ -9,37 +9,59 @@ function generateSixDigitCode() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
+function getCooldownSeconds() {
+  return 60;
+}
+
+const invalidCodeMessage = "Invalid/expired/wrong code entered";
+
 export async function verifyLoginCode(formData: FormData) {
   const email = formData.get("email")?.toString().trim() ?? "";
   const code = formData.get("code")?.toString().trim() ?? "";
   const loginToken = formData.get("loginToken")?.toString().trim() ?? "";
 
-  const record = await prisma.loginVerificationToken.findFirst({
-    where: {
-      email,
-      code,
-      loginToken,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  let record;
+
+  try {
+    record = await prisma.loginVerificationToken.findFirst({
+      where: {
+        email,
+        code,
+        loginToken,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  } catch {
+    return {
+      success: false,
+      error: invalidCodeMessage,
+    };
+  }
 
   if (!record) {
     return {
       success: false,
-      error: "Invalid or expired code.",
+      error: invalidCodeMessage,
     };
   }
 
   if (record.expiresAt < new Date()) {
-    await prisma.loginVerificationToken.deleteMany({
-      where: { email },
-    });
+    try {
+      await prisma.loginVerificationToken.deleteMany({
+        where: { email },
+      });
+    } catch {
+      return {
+        success: false,
+        error: invalidCodeMessage,
+      };
+    }
 
     return {
       success: false,
-      error: "Invalid or expired code.",
+      error: invalidCodeMessage,
     };
   }
 
@@ -58,7 +80,7 @@ export async function verifyLoginCode(formData: FormData) {
     if (error instanceof AuthError) {
       return {
         success: false,
-        error: "Login could not be completed.",
+        error: invalidCodeMessage,
       };
     }
 
@@ -69,16 +91,27 @@ export async function verifyLoginCode(formData: FormData) {
 export async function resendLoginCode(formData: FormData) {
   const email = formData.get("email")?.toString().trim() ?? "";
   const loginToken = formData.get("loginToken")?.toString().trim() ?? "";
+  const resendFailureMessage =
+    "We couldn't resend your code right now. Please try again in a moment.";
 
-  const record = await prisma.loginVerificationToken.findFirst({
-    where: {
-      email,
-      loginToken,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  let record;
+
+  try {
+    record = await prisma.loginVerificationToken.findFirst({
+      where: {
+        email,
+        loginToken,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  } catch {
+    return {
+      success: false,
+      error: resendFailureMessage,
+    };
+  }
 
   if (!record) {
     return {
@@ -87,22 +120,48 @@ export async function resendLoginCode(formData: FormData) {
     };
   }
 
+  const cooldownSeconds = getCooldownSeconds();
+  const secondsSinceLastSend = Math.floor(
+    (Date.now() - record.lastSentAt.getTime()) / 1000
+  );
+  const secondsRemaining = Math.max(0, cooldownSeconds - secondsSinceLastSend);
+
+  if (secondsRemaining > 0) {
+    return {
+      success: false,
+      error: `Please wait ${secondsRemaining} seconds before requesting another code.`,
+      resendSecondsLeft: secondsRemaining,
+    };
+  }
+
   const newCode = generateSixDigitCode();
+  const nextResendCount = record.resendCount + 1;
+  const nextCooldownSeconds = getCooldownSeconds();
 
-  await prisma.loginVerificationToken.update({
-    where: {
-      id: record.id,
-    },
-    data: {
-      code: newCode,
-      expiresAt: new Date(Date.now() + 1000 * 60 * 10),
-    },
-  });
+  try {
+    await prisma.loginVerificationToken.update({
+      where: {
+        id: record.id,
+      },
+      data: {
+        code: newCode,
+        expiresAt: new Date(Date.now() + 1000 * 60 * 10),
+        lastSentAt: new Date(),
+        resendCount: nextResendCount,
+      },
+    });
 
-  await sendLoginOtpEmail(email, newCode);
+    await sendLoginOtpEmail(email, newCode);
+  } catch {
+    return {
+      success: false,
+      error: resendFailureMessage,
+    };
+  }
 
   return {
     success: true,
     message: "A new verification code has been sent.",
+    resendSecondsLeft: nextCooldownSeconds,
   };
 }

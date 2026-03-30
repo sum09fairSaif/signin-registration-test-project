@@ -7,6 +7,7 @@ import { requestPasswordReset } from "./actions";
 
 export default function ForgotPasswordPage() {
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -14,6 +15,17 @@ export default function ForgotPasswordPage() {
     const formData = new FormData(event.currentTarget);
     const result = await requestPasswordReset(formData);
 
+    if (!result) {
+      return;
+    }
+
+    if (!result.success) {
+      setError(result.error || "Could not send the reset link.");
+      setMessage("");
+      return;
+    }
+
+    setError("");
     setMessage(result.message || "");
     event.currentTarget.reset();
   }
@@ -28,6 +40,7 @@ export default function ForgotPasswordPage() {
           Enter your email and we&apos;ll send you a reset link.
         </p>
 
+        {error && <p className="auth-error">{error}</p>}
         {message && <p className="auth-success">{message}</p>}
 
         <form onSubmit={handleSubmit} className="auth-form">

@@ -53,6 +53,8 @@ export async function loginUser(formData: FormData) {
       code,
       loginToken,
       expiresAt: new Date(Date.now() + 1000 * 60 * 10),
+      lastSentAt: new Date(),
+      resendCount: 0,
     },
   });
 
@@ -63,6 +65,7 @@ export async function loginUser(formData: FormData) {
     requiresOtp: true,
     email,
     loginToken,
+    resendSecondsLeft: 60,
     message: "A verification code has been sent to your email.",
   };
 }
