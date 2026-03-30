@@ -13,11 +13,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         email: {},
         password: {},
         loginToken: {},
+        emailVerificationToken: {},
       },
       async authorize(credentials) {
         const email = credentials?.email as string | undefined;
         const password = credentials?.password as string | undefined;
         const loginToken = credentials?.loginToken as string | undefined;
+        const emailVerificationToken = credentials?.emailVerificationToken as
+          | string
+          | undefined;
 
         if (!email) {
           return null;
@@ -33,6 +37,35 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (!user.emailVerified) {
           return null;
+        }
+
+        // First-time sign-in right after successful email verification
+        if (emailVerificationToken) {
+          const verificationRecord =
+            await prisma.emailVerificationToken.findUnique({
+              where: { token: emailVerificationToken },
+            });
+
+          if (!verificationRecord || verificationRecord.email !== email) {
+            return null;
+          }
+
+          if (verificationRecord.expiresAt < new Date()) {
+            await prisma.emailVerificationToken.deleteMany({
+              where: { email },
+            });
+            return null;
+          }
+
+          await prisma.emailVerificationToken.deleteMany({
+            where: { email },
+          });
+
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+          };
         }
 
         // OTP-completed login path

@@ -59,3 +59,22 @@ export async function sendEmailVerificationEmail(to: string, token: string) {
     throw new Error(error.message);
   }
 }
+
+export async function sendWelcomeEmail(to: string, name: string) {
+  const { error } = await resend.emails.send({
+    from: process.env.EMAIL_FROM!,
+    to,
+    subject: "Welcome to AuthFlows",
+    html: `
+      <h2>Welcome to AuthFlows, ${name}!</h2>
+      <p>Your account has been verified successfully, and we are excited to have you with us.</p>
+      <p>Thank you for signing up and for choosing to use our website.</p>
+      <p>We hope your experience here is smooth, secure, and genuinely helpful from the very beginning.</p>
+      <p>Warm regards,<br />The AuthFlows Team</p>
+    `,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}

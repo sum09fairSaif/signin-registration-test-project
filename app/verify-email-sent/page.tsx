@@ -1,7 +1,6 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import Link from "next/link";
 
 export default function VerifyEmailSentPage() {
   const params = useSearchParams();
@@ -38,11 +37,6 @@ export default function VerifyEmailSentPage() {
           Please check your inbox and click the verification link to activate your account.
         </p>
 
-        <div style={{ marginTop: "28px" }}>
-          <Link href="/login" className="auth-button" style={{ display: "inline-block", padding: "14px 28px" }}>
-            Go to Login
-          </Link>
-        </div>
       </section>
     </main>
   );
