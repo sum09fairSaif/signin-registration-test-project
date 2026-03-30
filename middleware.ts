@@ -4,7 +4,6 @@ import type { NextRequest } from "next/server";
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // ✅ allow these routes
   const publicRoutes = [
     "/login",
     "/signup",
@@ -21,7 +20,6 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // ❌ everything else → redirect to login
   return NextResponse.redirect(new URL("/login", request.url));
 }
 
