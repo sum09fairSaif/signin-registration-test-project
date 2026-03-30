@@ -1,13 +1,12 @@
-import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
+export default async function HomePage() {
+  const session = await auth();
 
-export default async function Home() {
-  const count = await prisma.user.count();
+  if (session) {
+    redirect("/dashboard");
+  }
 
-  return (
-    <main style={{ padding: "2rem", fontFamily: "Arial, sans-serif" }}>
-      <h1>Milestone 4 In Progress</h1>
-      <p>Total users in database: {count}</p>
-    </main>
-  );
+  redirect("/login");
 }
