@@ -14,6 +14,13 @@ export async function resetPassword(formData: FormData) {
     };
   }
 
+  if (!password) {
+    return {
+      success: false,
+      error: "Please enter a new password.",
+    };
+  }
+
   let resetRecord;
 
   try {
@@ -39,6 +46,37 @@ export async function resetPassword(formData: FormData) {
     return {
       success: false,
       error: "This reset link has expired. Please request a new one.",
+    };
+  }
+
+  let user;
+
+  try {
+    user = await prisma.user.findUnique({
+      where: { email: resetRecord.email },
+      select: { passwordHash: true },
+    });
+  } catch {
+    return {
+      success: false,
+      error:
+        "We couldn't verify your account right now. Please try again in a moment.",
+    };
+  }
+
+  if (!user) {
+    return {
+      success: false,
+      error: "We couldn't find an account for this reset link.",
+    };
+  }
+
+  const isCurrentPassword = await argon2.verify(user.passwordHash, password);
+
+  if (isCurrentPassword) {
+    return {
+      success: false,
+      error: "Your new password must be different from your current password.",
     };
   }
 
