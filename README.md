@@ -45,7 +45,7 @@ After registration, the user receives a verification link. When they open it:
 - the user is automatically signed in
 - the user is redirected directly to the dashboard
 
-This is an important UX improvement over the older “verify, then manually log in” flow. The current implementation turns verification into the completion step of onboarding.
+This implementation is an important UX application that turns verification into the completion step of onboarding.
 
 ### 3. Password Login With OTP Verification
 
