@@ -72,7 +72,12 @@ export default function LoginPage() {
                 className="auth-input"
                 autoComplete="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (error) {
+                    setError("");
+                  }
+                }}
                 required
               />
               <User className="auth-input-icon" size={18} />
@@ -88,7 +93,12 @@ export default function LoginPage() {
                 className="auth-input"
                 autoComplete="current-password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (error) {
+                    setError("");
+                  }
+                }}
                 required
               />
               <Lock className="auth-input-icon" size={18} />

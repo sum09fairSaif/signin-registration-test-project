@@ -98,7 +98,12 @@ export default function ResetPasswordForm({ token }: { token: string }) {
                 className="auth-input"
                 autoComplete="new-password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (error) {
+                    setError("");
+                  }
+                }}
                 required
                 disabled={!!message}
               />
@@ -115,7 +120,12 @@ export default function ResetPasswordForm({ token }: { token: string }) {
                 className="auth-input"
                 autoComplete="new-password"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  if (error) {
+                    setError("");
+                  }
+                }}
                 required
                 disabled={!!message}
               />

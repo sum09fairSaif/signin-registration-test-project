@@ -12,7 +12,8 @@ export default function ForgotPasswordPage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const formData = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    const formData = new FormData(form);
     const result = await requestPasswordReset(formData);
 
     if (!result) {
@@ -27,7 +28,7 @@ export default function ForgotPasswordPage() {
 
     setError("");
     setMessage(result.message || "");
-    event.currentTarget.reset();
+    form.reset();
   }
 
   return (
