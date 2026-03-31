@@ -68,7 +68,7 @@ If a user forgets their password, they can request a reset link:
 - the token is emailed to the user
 - the user opens the reset-password page with the token
 - the app verifies the token and expiry
-- the new password is validated and hashed
+- the new password is validated, checked to ensure that they are not putting in their current password as their newly-created password, and hashed if successful
 - the user’s password hash is updated in the database
 
 ### 5. Protected Dashboard
