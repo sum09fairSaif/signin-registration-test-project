@@ -91,6 +91,9 @@ Inside the dashboard, users can update a limited set of profile fields:
 - age
 - gender
 - profile picture
+- home address
+- work address
+- a short bio describing themselves
 
 The system is intentionally restrictive. Users cannot edit arbitrary account data. Only explicitly permitted fields are accepted by the server action that updates the profile.
 
