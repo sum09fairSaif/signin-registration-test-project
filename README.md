@@ -217,7 +217,7 @@ APP_URL=http://localhost:3000
 
 Notes:
 
-- `DATABASE_URL` should points to my PostgreSQL instance.
+- `DATABASE_URL` points to my PostgreSQL instance.
 - `AUTH_SECRET` is required by Auth.js.
 - `RESEND_API_KEY` and `EMAIL_FROM` are required for transactional emails.
 - `APP_URL` should match the base URL where the app is running.
