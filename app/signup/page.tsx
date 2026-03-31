@@ -24,6 +24,18 @@ export default function SignupPage() {
 
   const router = useRouter();
 
+  function clearErrors(fields: string[]) {
+    setErrors((current) => {
+      const next = { ...current };
+
+      for (const field of fields) {
+        delete next[field];
+      }
+
+      return next;
+    });
+  }
+
   const checks = useMemo(() => {
     return {
       length: password.length >= 8,
@@ -81,7 +93,10 @@ export default function SignupPage() {
                 className="auth-input"
                 autoComplete="name"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  clearErrors(["name"]);
+                }}
                 required
               />
               <User className="auth-input-icon" size={18} />
@@ -99,7 +114,10 @@ export default function SignupPage() {
                 className="auth-input"
                 autoComplete="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  clearErrors(["email"]);
+                }}
                 required
               />
               <Mail className="auth-input-icon" size={18} />
@@ -117,7 +135,10 @@ export default function SignupPage() {
                 className="auth-input"
                 autoComplete="new-password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  clearErrors(["password", "confirmPassword"]);
+                }}
                 required
               />
               <Lock className="auth-input-icon" size={18} />
@@ -137,7 +158,10 @@ export default function SignupPage() {
                 className="auth-input"
                 autoComplete="new-password"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  clearErrors(["confirmPassword", "password"]);
+                }}
                 required
               />
               <Lock className="auth-input-icon" size={18} />

@@ -217,7 +217,7 @@ APP_URL=http://localhost:3000
 
 Notes:
 
-- `DATABASE_URL` points to my PostgreSQL instance.
+- `DATABASE_URL` should point to the PostgreSQL instance.
 - `AUTH_SECRET` is required by Auth.js.
 - `RESEND_API_KEY` and `EMAIL_FROM` are required for transactional emails.
 - `APP_URL` should match the base URL where the app is running.
@@ -253,7 +253,33 @@ npm run dev
 npm run build
 npm run start
 npm run lint
+npm run test
+npm run test:run
+npm run test:e2e
 ```
+
+## Testing
+
+The project now includes an automated test setup with:
+
+- `Vitest` for unit and server-action tests
+- `Playwright` for end-to-end browser tests
+
+Current coverage includes:
+
+- signup schema validation
+- login action behavior for invalid credentials
+- login action success behavior that creates an OTP challenge
+- reset-password protection against reusing the current password
+- profile update validation and successful profile saves
+- protected-route redirect behavior for unauthenticated users
+- forgot-password UI success flow on `/forgot-password`
+
+Available test commands:
+
+- `npm run test` to start Vitest in watch mode
+- `npm run test:run` to run the Vitest suite once
+- `npm run test:e2e` to run the Playwright browser suite
 
 ## Architecture Notes
 
@@ -267,4 +293,3 @@ npm run lint
 
 - `phone` and `phoneVerified` exist in the schema but are not yet surfaced in the UI.
 - Profile images are stored directly as data URLs rather than in object storage.
-- There is no automated test suite configured yet.
